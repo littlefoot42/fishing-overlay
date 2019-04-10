@@ -36,6 +36,7 @@ html {
     var intervalId;
     var startTime;
     var example;
+    var fishCollection = [];
 
     function getTimerElement() {
         'use strict';
@@ -58,6 +59,7 @@ html {
 
     function parseFishingResult(message) {
         'use strict';
+        console.log(message)
         let result = {
             printableText: '',
             fishName: '',
@@ -68,9 +70,9 @@ html {
         let metaBlock;
         for (let char of message) {
             const point = char.charCodeAt(0);
-            //console.debug("----");
-            //console.debug(STATE);
-            //console.debug(point.toString(16));
+            // console.debug("----");
+            // console.debug(STATE);
+            // console.debug(point.toString(16));
             if (STATE === 'TEXT' || STATE === 'FISH_NAME') {
                 if (point == 2) {
                     STATE = 'META_BLOCK_START';
@@ -102,8 +104,9 @@ html {
                         console.warn("Didn't parse message correctly", message);
                     }
                     result.metaBlocks.push(metaBlock);
-                    if (result.metaBlocks.length == 4) {
+                    if (result.metaBlocks.length == 7) {
                         // Fish name seems to appear after fourth block
+                        // update: 7th?
                         STATE = 'FISH_NAME';
                     } else {
                         STATE = 'TEXT';
@@ -149,10 +152,12 @@ html {
             stopTimer();
         } else if (message.startsWith("You lose your")) {
             stopTimer();
-        } else if (message.startsWith("You land a")) {
+        } else if (message.startsWith("You land")) {
             const fishingResult = parseFishingResult(message);
             if (fishingResult.fishName) {
                 console.log(fishingResult);
+                fishCollection.push(fishingResult);
+                //console.table(fishCollection)
             }
         } else {
             //console.log("Unknown log", payload);
