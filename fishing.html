@@ -37,6 +37,9 @@ html {
     var startTime;
     var example;
     var fishCollection = [];
+    var environment = {
+        chum: false
+    };
 
     function getTimerElement() {
         'use strict';
@@ -64,7 +67,8 @@ html {
             printableText: '',
             fishName: '',
             metaBlocks: [],
-            hq: false
+            hq: false,
+            effects: {}
         };
         let STATE = 'TEXT';
         let metaBlock;
@@ -123,6 +127,22 @@ html {
         return result;
     }
 
+    function parseEffect(message) {
+        console.log(message);
+
+        // whether effect should be on/off after parsing this
+        var effectStatus = false;
+        if (message.startsWith("You gain")){
+            effectStatus = true;
+        }
+
+        if (message.includes("Chum")) {
+            environment.chum = effectStatus;
+        }else{
+            console.log("Unknown effect: ", message);
+        }
+    }
+    
     function onLogLine(event) {
         'use strict';
         const detail = event.detail;
@@ -154,11 +174,18 @@ html {
             stopTimer();
         } else if (message.startsWith("You land")) {
             const fishingResult = parseFishingResult(message);
+
+            // add buffs to result from effects var
+            result.buffs = effects;
+
             if (fishingResult.fishName) {
                 console.log(fishingResult);
                 fishCollection.push(fishingResult);
-                //console.table(fishCollection)
             }
+        } else if (message.startsWith("You gain the effect of") ||
+                message.startsWith("You lose the effect of")){
+            console.log("Effect: ", message);
+            parseEffect(message);
         } else {
             //console.log("Unknown log", payload);
         }
